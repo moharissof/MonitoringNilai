@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas = ["public"]
+}
+
+// Models User
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@schema("public")
+}
+
+model Mahasiswa {
+  id        String   @id @default(cuid())
+  nama     String?
+  nim      String?  @unique
+  prodi    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dospem   Dospem[]
+  @@schema("public")
+}
+
+model Dosen {
+  id        String   @id @default(cuid())
+  nama      String?
+  nidn      String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Dospem     Dospem[]
+  @@schema("public")
+}
+
+model Dospem {
+  id        String   @id @default(cuid())
+  dosenId   String?
+  mahasiswaId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dosen      Dosen?     @relation(fields: [dosenId], references: [id])
+  mahasiswa Mahasiswa? @relation(fields: [mahasiswaId], references: [id])
+  @@schema("public")
+}
+
+// Model Penilaian
+
+model Periode {
+  id        String   @id @default(cuid())
+  nama      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  penilaianMahasiswa PenilaianMahasiswa[]
+  penilaianDosen PenilaianDosen[]
+
+  @@schema("public")
+}
+
+
+model Kategori {
+  id        String   @id @default(cuid())
+  nama      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  penilaianMahasiswa PenilaianMahasiswa[]
+  penilaianDosen PenilaianDosen[]
+  @@schema("public")
+}
+
+model Bobot {
+  id        String   @id @default(cuid())
+  nama      String?
+  nilai     Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  penilaianMahasiswa PenilaianMahasiswa[]
+  penilaianDosen PenilaianDosen[]
+  @@schema("public")
+}
+
+model Minggu {
+  id        String   @id @default(cuid())
+  nama      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  penilaianMahasiswa PenilaianMahasiswa[]
+  penilaianDosen PenilaianDosen[]
+  @@schema("public")
+}
+
+model PenilaianMahasiswa {
+  id        String   @id @default(cuid())
+  hari      String?
+  kategoriId String?
+  bobotId    String?
+  periodeId String?
+  mingguId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  kategori   Kategori? @relation(fields: [kategoriId], references: [id])
+  bobot      Bobot?    @relation(fields: [bobotId], references: [id])
+  minggu    Minggu?   @relation(fields: [mingguId], references: [id])
+  periode   Periode?  @relation(fields: [periodeId], references: [id])
+  @@schema("public")
+}
+
+model PenilaianDosen {
+  id        String   @id @default(cuid())
+  hari      String?
+  kategoriId String?
+  bobotId    String?
+  periodeId String?
+  mingguId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  kategori   Kategori? @relation(fields: [kategoriId], references: [id])
+  bobot      Bobot?    @relation(fields: [bobotId], references: [id])
+  minggu    Minggu?   @relation(fields: [periodeId], references: [id])
+  periode   Periode?  @relation(fields: [mingguId], references: [id])
+  @@schema("public")
+}
+
